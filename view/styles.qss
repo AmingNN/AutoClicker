@@ -1,0 +1,59 @@
+/* view/styles.qss */
+
+/* 强制设置主窗口背景 */
+QMainWindow, QWidget#central_widget, QStackedWidget {
+    background-color: #FFFFFF;
+}
+
+/* 顶部状态标签 - 更加精致的灰色 */
+QLabel#status_label {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1D1D1F;
+    padding: 20px;
+}
+
+/* 模式切换容器 */
+QWidget#mode_container {
+    background-color: #F5F5F7;
+    border-radius: 12px;
+    margin: 10px;
+}
+
+/* 按钮 - 苹果式的悬浮感 */
+QPushButton {
+    background-color: #FFFFFF;
+    border: 1px solid #D2D2D7;
+    border-radius: 10px;
+    padding: 10px 20px;
+    color: #1D1D1F;
+    font-size: 14px;
+}
+
+QPushButton:hover {
+    background-color: #F5F5F7;
+    border-color: #007AFF;
+}
+
+/* 被选中的模式按钮 */
+QPushButton[active="true"] {
+    background-color: #007AFF;
+    color: #FFFFFF;
+    border: none;
+}
+
+/* 输入框 */
+QLineEdit {
+    background-color: #F5F5F7;
+    border: none;
+    border-radius: 8px;
+    padding: 8px;
+    color: #1D1D1F;
+}
+
+/* 热键提示 */
+QLabel#hint_label {
+    color: #86868B;
+    font-size: 12px;
+    margin-bottom: 10px;
+}
