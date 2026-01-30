@@ -69,3 +69,16 @@ class MainWindow(QMainWindow):
         self.hint_label.setObjectName("hint_label")
         self.hint_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.hint_label)
+
+    def update_status(self, text, color):
+        """更新状态文字和颜色"""
+        self.status_label.setText(text)
+        self.status_label.setStyleSheet(f"color: {color}; font-size: 20px; font-weight: 700;")
+
+    def refresh_style(self):
+        """刷新样式，使按钮的 active 属性生效"""
+        self.style().unpolish(self.btn_clicker)
+        self.style().polish(self.btn_clicker)
+        self.style().unpolish(self.btn_script)
+        self.style().polish(self.btn_script)
+        self.update()

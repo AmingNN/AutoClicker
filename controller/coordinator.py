@@ -1,12 +1,15 @@
-from PySide6.QtCore import QObject, QThread, Signal
+import os
+import time
+from PySide6.QtCore import QObject, Signal, Slot
 from pynput import keyboard
 from model.recorder import Recorder
 from model.player import Player
+from model.action import save_actions_to_yaml
 
 
 class Coordinator(QObject):
-    # 定义一些内部状态信号，方便更新 UI
-    status_changed = Signal(str)
+    # 用于安全地跨线程更新 UI 的信号
+    status_updated = Signal(str, str)  # (状态文字, 颜色代码)
 
     def __init__(self, view):
         super().__init__()
@@ -14,44 +17,66 @@ class Coordinator(QObject):
         self.recorder = Recorder()
         self.player = Player()
 
-        self.is_active = False  # 记录当前是否正在工作（录制或回放）
-
-        # 1. 绑定 UI 按钮（点击界面按钮切换模式等）
-        self.setup_connections()
-
-        # 2. 启动全局热键监听
-        self.start_hotkey_listener()
-
-    def setup_connections(self):
-        # 示例：点击界面上的模式按钮，View 只需要切换显示，Controller 记录状态
-        self.view.btn_clicker.clicked.connect(lambda: self.set_mode("clicker"))
-        self.view.btn_script.clicked.connect(lambda: self.set_mode("script"))
-
-    def start_hotkey_listener(self):
-        # 使用 pynput 监听全局键盘
-        self.hotkey_listener = keyboard.Listener(on_press=self._on_key_press)
-        self.hotkey_listener.start()
-
-    def _on_key_press(self, key):
-        # 检查是否按下 F8
-        if key == keyboard.Key.f8:
-            self.toggle_work()
-
-    def toggle_work(self):
-        """核心切换逻辑：开始或停止"""
-        if self.is_active:
-            self.stop_all()
-        else:
-            self.start_all()
-
-    def start_all(self):
-        self.is_active = True
-        # 根据当前模式，决定是启动 recorder 还是 player
-        # 这里需要处理线程逻辑...
-        self.status_changed.emit("Running...")
-
-    def stop_all(self):
+        self.current_mode = "clicker"  # 默认模式
         self.is_active = False
-        self.recorder.stop()
-        self.player.stop()
-        self.status_changed.emit("Ready")
+
+        self._setup_signals()
+        self._start_hotkey_listener()
+
+    def _setup_signals(self):
+        # 1. 绑定 View 按钮切换模式
+        self.view.btn_clicker.clicked.connect(lambda: self._switch_mode("clicker"))
+        self.view.btn_script.clicked.connect(lambda: self._switch_mode("script"))
+
+        # 2. 绑定 Controller 信号到 View 的更新方法
+        self.status_updated.connect(self.view.update_status)
+
+    def _switch_mode(self, mode):
+        if not self.is_active:
+            self.current_mode = mode
+            # 更新 View 的按钮状态（通过属性改变 QSS 样式）
+            self.view.btn_clicker.setProperty("active", "true" if mode == "clicker" else "false")
+            self.view.btn_script.setProperty("active", "true" if mode == "script" else "false")
+            self.view.refresh_style()  # 通知 View 刷新样式
+
+    def _start_hotkey_listener(self):
+        self.listener = keyboard.Listener(on_press=self._on_press)
+        self.listener.start()
+
+    def _on_press(self, key):
+        if key == keyboard.Key.f8:
+            self.toggle_task()
+
+    def toggle_task(self):
+        if self.is_active:
+            self.stop_work()
+        else:
+            self.start_work()
+
+    def start_work(self):
+        self.is_active = True
+        if self.current_mode == "clicker":
+            self.status_updated.emit("Clicking...", "#007AFF")
+            # 开启连点逻辑（实际开发中建议放入 QThread，此处先示意逻辑）
+            interval = float(self.view.interval_input.text() or 0.01)
+            # 注意：play_fast_click 内部有 while 循环，这里需要异步处理
+            import threading
+            threading.Thread(target=self.player.play_fast_click, args=(interval,), daemon=True).start()
+        else:
+            self.status_updated.emit("Recording...", "#FF3B30")  # 苹果红
+            self.recorder.start()
+
+    def stop_work(self):
+        self.is_active = False
+        if self.current_mode == "clicker":
+            self.player.stop()
+        else:
+            actions = self.recorder.stop()
+            if actions:
+                # 自动保存到 records 文件夹，以时间戳命名
+                if not os.path.exists("records"): os.makedirs("records")
+                filename = f"records/record_{int(time.time())}.yaml"
+                save_actions_to_yaml(actions, filename)
+
+        self.status_updated.emit("Ready", "#1D1D1F")
+
