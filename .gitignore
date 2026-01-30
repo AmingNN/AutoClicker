@@ -1,0 +1,10 @@
+# --- Python 相关 ---
+__pycache__/
+.idea/
+
+# --- 虚拟环境 ---
+.venv/
+
+# --- 配置文件与项目特定 ---
+#config.yaml
+records/*.yaml
