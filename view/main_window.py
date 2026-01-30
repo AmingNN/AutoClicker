@@ -1,5 +1,6 @@
 import os
-from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton, QLabel, QFileDialog, QLineEdit
+from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton, QLabel, QFileDialog, QLineEdit, \
+    QListWidget, QHBoxLayout, QStackedWidget
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import QFile, QTextStream, Qt
 
@@ -28,7 +29,6 @@ class MainWindow(QMainWindow):
             self.setStyleSheet(stream.readAll())
 
     def init_ui(self):
-        # 中央部件设置 ID 供 QSS 识别
         central_widget = QWidget()
         central_widget.setObjectName("central_widget")
         self.setCentralWidget(central_widget)
@@ -37,38 +37,69 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(15)
 
-        # 状态显示
+        # 1. 状态显示
         self.status_label = QLabel("Ready")
         self.status_label.setObjectName("status_label")
         self.status_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.status_label)
 
-        # 模式选择区 (放入一个容器里做圆角底色)
+        # 2. 模式选择按钮 (这部分是公共的)
         self.mode_container = QWidget()
         self.mode_container.setObjectName("mode_container")
-        mode_layout = QVBoxLayout(self.mode_container)
+        mode_btn_layout = QHBoxLayout(self.mode_container)  # 改为横向排布更像苹果风格
 
         self.btn_clicker = QPushButton("连点模式")
         self.btn_script = QPushButton("录制模式")
-        # 默认点击模式激活 (QSS 中用 [active="true"] 识别)
         self.btn_clicker.setProperty("active", "true")
 
-        mode_layout.addWidget(self.btn_clicker)
-        mode_layout.addWidget(self.btn_script)
+        mode_btn_layout.addWidget(self.btn_clicker)
+        mode_btn_layout.addWidget(self.btn_script)
         layout.addWidget(self.mode_container)
 
-        # 间隔设置区
+        # --- 3. 核心：堆栈容器 (QStackedWidget) ---
+        self.pages = QStackedWidget()
+        layout.addWidget(self.pages)
+
+        # [第一页：连点模式页面]
+        self.clicker_page = QWidget()
+        clicker_layout = QVBoxLayout(self.clicker_page)
         self.interval_input = QLineEdit()
         self.interval_input.setPlaceholderText("点击间隔 (秒)... 默认 0.01")
-        layout.addWidget(self.interval_input)
+        clicker_layout.addWidget(QLabel("设置点击频率:"))
+        clicker_layout.addWidget(self.interval_input)
+        clicker_layout.addStretch()  # 推到顶部
+        self.pages.addWidget(self.clicker_page)
 
-        layout.addStretch()  # 弹簧，将内容往上推
+        # [第二页：录制模式页面]
+        self.script_page = QWidget()
+        script_layout = QVBoxLayout(self.script_page)
 
-        # 热键提示
-        self.hint_label = QLabel("Press F8 to Start / Stop")
+        # 列表头
+        list_header = QHBoxLayout()
+        list_header.addWidget(QLabel("已录制脚本"))
+        self.btn_refresh = QPushButton("刷新")
+        self.btn_refresh.setObjectName("refresh_btn")
+        self.btn_refresh.setFixedWidth(60)
+        list_header.addStretch()
+        list_header.addWidget(self.btn_refresh)
+        script_layout.addLayout(list_header)
+
+        # 脚本列表
+        self.script_list = QListWidget()
+        self.script_list.setObjectName("script_list")
+        script_layout.addWidget(self.script_list)
+        self.pages.addWidget(self.script_page)
+
+        # --- 4. 底部提示 ---
+        layout.addStretch()
+        self.hint_label = QLabel("F8: 开始/停止 | F9: 回放选中")
         self.hint_label.setObjectName("hint_label")
         self.hint_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.hint_label)
+
+        # 5. 绑定切换逻辑 (这是 View 内部的视觉切换)
+        self.btn_clicker.clicked.connect(lambda: self.pages.setCurrentIndex(0))
+        self.btn_script.clicked.connect(lambda: self.pages.setCurrentIndex(1))
 
     def update_status(self, text, color):
         """更新状态文字和颜色"""

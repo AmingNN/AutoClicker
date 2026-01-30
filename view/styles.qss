@@ -1,26 +1,24 @@
-/* view/styles.qss */
-
-/* 强制设置主窗口背景 */
+/* --- 基础窗口与背景 --- */
 QMainWindow, QWidget#central_widget, QStackedWidget {
     background-color: #FFFFFF;
 }
 
-/* 顶部状态标签 - 更加精致的灰色 */
+/* --- 状态标签 (Ready/Recording/Clicking) --- */
 QLabel#status_label {
     font-size: 20px;
     font-weight: 700;
     color: #1D1D1F;
-    padding: 20px;
+    padding: 15px;
 }
 
-/* 模式切换容器 */
+/* --- 模式切换按钮容器 --- */
 QWidget#mode_container {
     background-color: #F5F5F7;
     border-radius: 12px;
-    margin: 10px;
+    margin: 5px;
 }
 
-/* 按钮 - 苹果式的悬浮感 */
+/* --- 通用按钮样式 (小米/苹果极简风) --- */
 QPushButton {
     background-color: #FFFFFF;
     border: 1px solid #D2D2D7;
@@ -28,32 +26,78 @@ QPushButton {
     padding: 10px 20px;
     color: #1D1D1F;
     font-size: 14px;
+    font-weight: 500;
 }
 
 QPushButton:hover {
-    background-color: #F5F5F7;
+    background-color: #FBFBFB;
     border-color: #007AFF;
 }
 
-/* 被选中的模式按钮 */
+/* 当按钮被设为 active="true" 时的样式 (用于模式切换) */
 QPushButton[active="true"] {
     background-color: #007AFF;
     color: #FFFFFF;
     border: none;
 }
 
-/* 输入框 */
+/* 特殊：刷新小按钮 */
+QPushButton#refresh_btn {
+    font-size: 12px;
+    padding: 5px 10px;
+    background-color: transparent;
+    border: 1px solid #D2D2D7;
+    color: #007AFF;
+    min-width: 50px;
+}
+
+/* --- 输入框样式 --- */
 QLineEdit {
     background-color: #F5F5F7;
-    border: none;
+    border: 1px solid #E5E5E7;
     border-radius: 8px;
     padding: 8px;
     color: #1D1D1F;
+    font-size: 14px;
 }
 
-/* 热键提示 */
+QLineEdit:focus {
+    border: 1px solid #007AFF;
+}
+
+/* --- 脚本列表样式 (QListWidget) --- */
+QListWidget {
+    background-color: #F5F5F7;
+    border: 1px solid #E5E5E7;
+    border-radius: 12px;
+    padding: 5px;
+    outline: none; /* 去除选中时的虚线框 */
+}
+
+/* 列表里的每一项 */
+QListWidget::item {
+    background-color: #FFFFFF;
+    margin: 4px;
+    padding: 12px;
+    border-radius: 8px;
+    color: #1D1D1F;
+    min-height: 25px; /* 确保每一行足够宽敞 */
+}
+
+/* 鼠标悬停在某一项上 */
+QListWidget::item:hover {
+    background-color: #F2F2F7;
+}
+
+/* 某一项被选中时 */
+QListWidget::item:selected {
+    background-color: #007AFF;
+    color: #FFFFFF;
+}
+
+/* --- 底部热键提示 --- */
 QLabel#hint_label {
     color: #86868B;
     font-size: 12px;
-    margin-bottom: 10px;
+    margin-top: 10px;
 }
