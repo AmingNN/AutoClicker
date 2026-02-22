@@ -1,0 +1,11 @@
+[project]
+name = "AutoClicker"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pynput>=1.8.1",
+    "pyside6>=6.10.2",
+    "pyyaml>=6.0.3",
+]

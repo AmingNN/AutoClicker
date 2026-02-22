@@ -19,3 +19,5 @@ build/
 # 打包生成的最终产物目录 (EXE 或 ZIP)
 dist/
 
+assets/app_icon.png
+assets/convert.py

@@ -50,4 +50,3 @@ class Player:
         强制停止播放
         """
         self.is_playing = False
-

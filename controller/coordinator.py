@@ -1,6 +1,6 @@
 import os
 import time
-from PySide6.QtCore import QObject, Signal, Slot
+from PySide6.QtCore import QObject, Signal
 from pynput import keyboard
 from model.recorder import Recorder
 from model.player import Player
@@ -132,5 +132,3 @@ class Coordinator(QObject):
                 self.refresh_script_list()
 
         self.status_updated.emit("Ready", "#1D1D1F")
-
-

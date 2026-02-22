@@ -30,4 +30,3 @@ def load_actions_from_yaml(filepath: str) -> List[MouseAction]:
     if not data:
         return []
     return [MouseAction(**d) for d in data]
-

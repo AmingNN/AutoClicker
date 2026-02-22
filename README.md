@@ -1,6 +1,6 @@
 # AutoClicker
 
-![Software Screenshot](assets/screenshot.png)
+![Software Screenshot](docs/img/screenshot.png)
 
 ## 📖 功能说明
 - **连点模式**：在当前鼠标位置高速点击。

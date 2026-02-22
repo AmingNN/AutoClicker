@@ -1,19 +1,39 @@
-import os
-from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton, QLabel, QFileDialog, QLineEdit, \
+import sys
+from pathlib import Path
+from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, \
     QListWidget, QHBoxLayout, QStackedWidget
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import QFile, QTextStream, Qt
 
+root = (
+    Path(sys.executable).resolve().parent
+    if getattr(sys, 'frozen', False) else
+    Path(__file__).resolve().parent.parent
+)
+
 
 class MainWindow(QMainWindow):
+
+    status_label: QLabel
+    hint_label: QLabel
+    btn_clicker: QPushButton
+    btn_script: QPushButton
+    pages: QStackedWidget
+    clicker_page: QWidget
+    script_page: QWidget
+    interval_input: QLineEdit
+    script_list: QListWidget
+    btn_refresh: QPushButton
+    mode_container: QWidget
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("AutoClicker")
         self.setFixedSize(380, 500)
 
         # 1. 设置窗口图标
-        icon_path = os.path.join(os.path.dirname(__file__), "..", "assets", "app_icon.png")
-        self.setWindowIcon(QIcon(icon_path))
+        icon_path = root / "assets" / "app.ico"
+        self.setWindowIcon(QIcon(str(icon_path)))
 
         # 2. 初始化 UI
         self.init_ui()
@@ -22,9 +42,9 @@ class MainWindow(QMainWindow):
         self.load_stylesheet()
 
     def load_stylesheet(self):
-        qss_path = os.path.join(os.path.dirname(__file__), "styles.qss")
+        qss_path = root / "view" / "styles.qss"
         file = QFile(qss_path)
-        if file.open(QFile.ReadOnly | QFile.Text):
+        if file.open(QFile.OpenModeFlag.ReadOnly | QFile.OpenModeFlag.Text):
             stream = QTextStream(file)
             self.setStyleSheet(stream.readAll())
 
@@ -40,7 +60,7 @@ class MainWindow(QMainWindow):
         # 1. 状态显示
         self.status_label = QLabel("Ready")
         self.status_label.setObjectName("status_label")
-        self.status_label.setAlignment(Qt.AlignCenter)
+        self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.status_label)
 
         # 2. 模式选择按钮 (这部分是公共的)
@@ -94,7 +114,7 @@ class MainWindow(QMainWindow):
         layout.addStretch()
         self.hint_label = QLabel("F8: 开始/停止 | F9: 回放选中")
         self.hint_label.setObjectName("hint_label")
-        self.hint_label.setAlignment(Qt.AlignCenter)
+        self.hint_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.hint_label)
 
         # 5. 绑定切换逻辑 (这是 View 内部的视觉切换)
